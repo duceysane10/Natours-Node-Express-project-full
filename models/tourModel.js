@@ -96,10 +96,10 @@ tourSchema.pre('save', function(next){
     next();
 })
 
-// tourSchema.pre('save', function(next){
-//     console.log('will saving.......');
-//     next();
-// })
+tourSchema.pre('save', function(next){
+    console.log('will saving.......');
+    next();
+})
 
 // tourSchema.post('save', function(doc,next){
 //     console.log(doc);

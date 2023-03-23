@@ -5,6 +5,7 @@ const authControllers = require('./../controllers/authControllers');
 const router = express.Router();
 
 router.post('/singup',authControllers.Signgup);
+router.post('/login',authControllers.login);
 
 router.route('/').get(userControllers.allusers).post(userControllers.cretaeuser);
 router.route('/:id').get(userControllers.singleuser);

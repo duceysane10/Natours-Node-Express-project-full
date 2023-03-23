@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+const bcrypt = require('bcrypt');
 
 // creating User Schema
 const userSchema= new mongoose.Schema({
@@ -25,6 +26,7 @@ const userSchema= new mongoose.Schema({
         trim: true,
         minlength: [8,'password must be at least 8 characters long'],
         maxlength: [20,'password must be at most 20 characters long'],
+        select: false
     },
     confirmPassword: {
         type: String,
@@ -39,14 +41,9 @@ const userSchema= new mongoose.Schema({
         }
     },
     photo: String    
-    });
+});
 
-// creating User Model
-const User= new mongoose.model('User', userSchema);
-
-// Exporting the User Model 
-module.exports = User;
-
+ 
 // paasword encrypting 
 userSchema.pre('save', async function(next){
     // only runs this function once password field is actually modified
@@ -56,4 +53,13 @@ userSchema.pre('save', async function(next){
     // Delete confirmPassword field
     this.confirmPassword = undefined;
     next();
-})
+});
+
+// creating instance method to check if the login password is matched with the password, this method we can acces all the related documents
+userSchema.methods.correctPassword = async function(gardianPassword,userpassword){
+    return await bcrypt.compare(gardianPassword,userpassword)
+}
+// creating User Model
+const User= new mongoose.model('User', userSchema);
+// Exporting the User Model 
+module.exports = User;

@@ -116,15 +116,15 @@ tourSchema.pre(/^find/, function(next){  // we use regular expression in order t
 });
 
 tourSchema.post(/^find/, function(doc,next){
-    console.log(`Query Took : ${Date.now() - this.Start} milliseconds!`)
-    console.log(doc);
+    // console.log(`Query Took : ${Date.now() - this.Start} milliseconds!`)
+    // console.log(doc);
     next();
 })
 
 // Aggregation MIDDLEWARE
 tourSchema.pre('aggregate', function(next){
     this.pipeline().unshift({$match: { secretTour: {$ne: true} } });
-    console.log(this.pipeline())
+    // console.log(this.pipeline())
     next();
 })
 const Tour = new mongoose.model('Tour',tourSchema);

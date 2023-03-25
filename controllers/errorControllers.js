@@ -1,15 +1,24 @@
 const appError = require('./../utils/appError.js');
+
+// cast Error function 
 const handleCastErrorDB = err =>{
     const message = `Invalid ${err.path}: ${err.value}.`
     return new appError(message,400);
     
 }
 
+// JWT ERR function
+const handleJWTErrorDB = () => new appError('Invalid Token , Please Login again ', 401)
+// Token Expires err function
+const handleTokenExpireErrorDB =() => new appError('Your Token has Expired,please login again', 401)
+
+// Dubblicate Error function
 const handleDublicateErrorDB = err =>{
     const message = `this : "${err.keyValue.name}" Already exit.`
     return new appError(message,500);
 }
 
+//  Validation Error function
 const handleValidatorErrorDB = err =>{
     const errors = Object.values(err.errors).map(el => el.message)
     const message = `Invalid Input data. ${errors.join('. ')}`;
@@ -34,7 +43,7 @@ const sendErrorPro = (err,res) =>{
     console.error('Error 💥',err);
     res.status(500).json({
         status: 'error',
-        message: 'Something went wrong!',
+        message: 'Something went very wrong!',
     })
    }
 }
@@ -49,7 +58,7 @@ module.exports=(err,req,res,next) => {
         sendErrorDev(err, res);
     }else if (process.env.NODE_ENV === 'production') {
         // let error = {...err};
-        console.log(err.name);
+        // console.log(err.name);
         if(err.name ==='CastError') {
             error = handleCastErrorDB(err);
             return sendErrorPro(error, res);
@@ -60,6 +69,14 @@ module.exports=(err,req,res,next) => {
         }
         if(err.name === 'ValidationError') {
             error = handleValidatorErrorDB(err);
+            return sendErrorPro(error, res);
+        }
+        if (err.name == 'JsonWebTokenError'){
+            error = handleJWTErrorDB(err);
+            return sendErrorPro(error, res);
+        } 
+        if (err.name == 'TokenExpiredError'){
+            error = handleTokenExpireErrorDB(err);
             return sendErrorPro(error, res);
         }
 

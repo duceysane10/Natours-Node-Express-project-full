@@ -13,6 +13,7 @@ const userRouter = require('./routes/userRouter');
 app.use(express.json());
 app.use((req,res,next)=>{
     console.log('Hello from the Middleware 👋');
+    // console.log(req.headers)
     next();
 })
 if(process.env.NODE_ENV === 'development'){

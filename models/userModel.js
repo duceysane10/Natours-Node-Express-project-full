@@ -20,6 +20,11 @@ const userSchema= new mongoose.Schema({
         validate: [validator.isEmail,'Please enter a valid email address'],
         trim: true,
     },
+    role:{
+        type: String,
+        enum:['user','admin','lead-guide'],
+        default: 'user',
+    },
     password: {
         type: String,
         required:[true,'User must have a password'],
@@ -28,6 +33,7 @@ const userSchema= new mongoose.Schema({
         maxlength: [20,'password must be at most 20 characters long'],
         select: false
     },
+    passwordChangedAt:Date,
     confirmPassword: {
         type: String,
         required:[true,'User must have a confirmPassword'],
@@ -40,6 +46,7 @@ const userSchema= new mongoose.Schema({
             message: 'Paswords are not Same'
         }
     },
+    
     photo: String    
 });
 
@@ -58,6 +65,18 @@ userSchema.pre('save', async function(next){
 // creating instance method to check if the login password is matched with the password, this method we can acces all the related documents
 userSchema.methods.correctPassword = async function(gardianPassword,userpassword){
     return await bcrypt.compare(gardianPassword,userpassword)
+}
+// instance methood of checking if the passord changed after Token issued
+userSchema.methods.changedPasswordAt = function(JWTtimestamp){
+    if(this.passwordChangedAt){
+        // converting milliseconds
+        const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000,10);
+        console.log(JWTtimestamp < changedTimestamp)
+        return JWTtimestamp < changedTimestamp
+       
+    }
+    // false means : after token issued the password not changed
+    return false;
 }
 // creating User Model
 const User= new mongoose.model('User', userSchema);

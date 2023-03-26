@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
@@ -46,8 +47,9 @@ const userSchema= new mongoose.Schema({
             message: 'Paswords are not Same'
         }
     },
-    
-    photo: String    
+    photo: String,
+    passwordResetToken: String,
+    passwordResetTokenExpires:Date
 });
 
  
@@ -78,6 +80,27 @@ userSchema.methods.changedPasswordAt = function(JWTtimestamp){
     // false means : after token issued the password not changed
     return false;
 }
+// Createing method that genereates Roundom ResetPassword token
+
+userSchema.methods.createResetPasswordToken = function(){
+    // creating Rondom reset password token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    // encrypt reset token and save to database
+    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    // current DateTime plus 10 miint converting milliseconds saving in database so as to use as expiration Token
+    console.log({resetToken},this.passwordResetToken);
+    this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000
+    return resetToken;
+}
+
+
+
+
+
+
+
+
+
 // creating User Model
 const User= new mongoose.model('User', userSchema);
 // Exporting the User Model 

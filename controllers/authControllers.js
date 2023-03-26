@@ -16,7 +16,9 @@ exports.Signgup = catchAsync(async(req,res,next) =>{
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
       passwordChangedAt:req.body.passwordChangedAt,
-      role: req.body.role
+      role: req.body.role,
+      passwordResetToken: req.body.passwordResetToken,
+      passwordResetTokenExpires: req.body.passwordResetTokenExpires
       // photo: req.body.photo
     });
     const token = SignToken(newUser._id)
@@ -79,6 +81,7 @@ exports.protectedRoute = catchAsync(async (req,res,next) =>{
    
 });
 
+// Autorizing the user To do Same Actions 
 exports.restrictTo = (...roles) => {
    return (req, res, next) => {
       if(!roles.includes(req.user.role)){
@@ -87,3 +90,16 @@ exports.restrictTo = (...roles) => {
       next();
    }
 }
+
+// Forgot Password Authentication
+exports.forgotPassword = catchAsync(async(req, res, next) => {
+   // 1) check if the user email address is valid
+   const user = await User.findOne({email: req.body.email})
+   if(!user){
+      return next(new appError('The Email address does not exist',403));
+   }
+   
+   // 2) generate Reset Tken 
+   const resetToken =  user.createResetPasswordToken()
+   await user.save({validateBeforeSave: false});
+})

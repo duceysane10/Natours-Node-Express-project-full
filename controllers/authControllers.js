@@ -4,12 +4,24 @@ const { promisify } = require('util');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const jwt = require('jsonwebtoken');
-const appError = require('./../utils/appError.js');
+const appError = require('./../utils/appError');
 const SendEmail = require('./../utils/email');
 
+// Generate Token function
 const SignToken = id =>{
    return jwt.sign({ id },process.env.JWT_SECRET,{
       expiresIn: process.env.JWT_EXPIRES_IN})
+}
+// Function creates and sends Token
+const cretaeSendToken =(user,statusCode,res) =>{
+   const token = SignToken(user._id)
+     res.status(statusCode).json({
+        status : 'success',
+        Token: token,
+        data:{
+         user
+        }
+     });
 }
 exports.Signgup = catchAsync(async(req,res,next) =>{
     const newUser = await User.create({
@@ -23,12 +35,8 @@ exports.Signgup = catchAsync(async(req,res,next) =>{
       passwordResetTokenExpires: req.body.passwordResetTokenExpires
       // photo: req.body.photo
     });
-    const token = SignToken(newUser._id)
-     res.status(200).json({
-        status : 'success',
-        Token: token,
-        User : newUser,
-     });
+   
+    cretaeSendToken(newUser,201,res)
 });
 
 exports.login = catchAsync(async(req,res,next) =>{
@@ -45,11 +53,7 @@ exports.login = catchAsync(async(req,res,next) =>{
    }
    
     // 3) if its ok Send Token to the User
-    const Token = SignToken(user._id)
-   res.status(201).json({
-      status : 'success',
-      Token
-   })
+    cretaeSendToken(user,200,res)
 })
 
 // Protected Route Miidleware
@@ -147,9 +151,28 @@ exports.resetPassword = async (req, res, next) => {
    // 3) Update changedPasswordAt property for the User
    
    // 4) Log the User in, Send JWT Token
-    const Token = SignToken(user._id)
-    res.status(200).json({
-      status: 'success',
-      Token: Token
-    })
+   cretaeSendToken(user,200,res)
 }
+
+// User updating his/her password
+exports.updatePassword = catchAsync(async (req, res,next)=>{
+   // 1) Get a User from Collection
+   const user = await User.findById(req.params.id).select('+password')
+   // console.log(user)
+   if(!user){
+      return next(new appError('User not found!',404))
+   }
+   // 2) check if the Current Password posted is the same as the Passwordold 
+
+   if(!(await user.correctPassword(req.body.currentpassword,user.password))){
+      return next(new appError('invalid current password!',401));
+   }
+   
+   // 3) if So update the password
+   user.password =req.body.password
+   user.confirmPassword = req.body.confirmPassword
+   await user.save();
+   
+   // 4) login the User and send JWT Token
+   cretaeSendToken(user,200,res)
+});

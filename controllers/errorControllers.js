@@ -69,7 +69,7 @@ module.exports=(err,req,res,next) => {
         }
         if(err.name === 'ValidationError') {
             error = handleValidatorErrorDB(err);
-            return sendErrorPro(error, res);
+            return next(sendErrorPro(error, res))
         }
         if (err.name == 'JsonWebTokenError'){
             error = handleJWTErrorDB(err);

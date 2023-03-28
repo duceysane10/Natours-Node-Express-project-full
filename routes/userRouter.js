@@ -8,6 +8,7 @@ router.post('/singup',authControllers.Signgup);
 router.post('/login',authControllers.login);
 router.post('/forgotPassword',authControllers.forgotPassword);
 router.patch('/resetPassword/:Token',authControllers.resetPassword);
+router.patch('/updatePassword/:id',authControllers.protectedRoute, authControllers.updatePassword);
 
 router.route('/').get(userControllers.allusers).post(userControllers.cretaeuser);
 router.route('/:id').get(userControllers.singleuser);

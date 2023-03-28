@@ -8,7 +8,8 @@ router.post('/singup',authControllers.Signgup);
 router.post('/login',authControllers.login);
 router.post('/forgotPassword',authControllers.forgotPassword);
 router.patch('/resetPassword/:Token',authControllers.resetPassword);
-router.patch('/updatePassword/:id',authControllers.protectedRoute, authControllers.updatePassword);
+router.patch('/updateMyPassword/:id',authControllers.protectedRoute, authControllers.updatePassword);
+router.patch('/updateMyProfile/:id',authControllers.protectedRoute, userControllers.updateMe);
 
 router.route('/').get(userControllers.allusers).post(userControllers.cretaeuser);
 router.route('/:id').get(userControllers.singleuser);

@@ -158,10 +158,10 @@ exports.resetPassword = async (req, res, next) => {
 exports.updatePassword = catchAsync(async (req, res,next)=>{
    // 1) Get a User from Collection
    const user = await User.findById(req.params.id).select('+password')
-   // console.log(user)
-   if(!user){
-      return next(new appError('User not found!',404))
-   }
+   console.log(user)
+   // if(!user){
+   //    return next(new appError('User not found!',404))
+   // }
    // 2) check if the Current Password posted is the same as the Passwordold 
 
    if(!(await user.correctPassword(req.body.currentpassword,user.password))){

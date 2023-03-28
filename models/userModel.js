@@ -73,7 +73,7 @@ userSchema.methods.changedPasswordAt = function(JWTtimestamp){
     if(this.passwordChangedAt){
         // converting milliseconds
         const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000,10);
-        console.log(JWTtimestamp < changedTimestamp)
+        // console.log(JWTtimestamp < changedTimestamp)
         return JWTtimestamp < changedTimestamp
        
     }
@@ -88,7 +88,7 @@ userSchema.methods.createResetPasswordToken = function(){
     // encrypt reset token and save to database
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     // current DateTime plus 10 miint converting milliseconds saving in database so as to use as expiration Token
-    console.log({resetToken},this.passwordResetToken);
+    // console.log({resetToken},this.passwordResetToken);
     this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000
     return resetToken;
 }

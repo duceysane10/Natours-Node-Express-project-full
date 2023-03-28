@@ -93,11 +93,13 @@ userSchema.methods.createResetPasswordToken = function(){
     return resetToken;
 }
 
-
-
-
-
-
+// When password changed update passwordChangedAt property
+userSchema.pre('save', function(next){
+    if(!this.isModified('password') || this.isNew) return next();
+    
+    this.passwordChangedAt = Date.now() -1000;
+    next();
+})
 
 
 

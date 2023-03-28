@@ -1,4 +1,5 @@
 // Using promisifying in side utility functions
+const crypto = require('crypto')
 const { promisify } = require('util');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
@@ -107,7 +108,7 @@ exports.forgotPassword = catchAsync(async(req, res, next) => {
    // 3) Send the Token  to the Users Email
    
    const Url = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`
-   const message = `Forgot your password? Please Submit a PATCH request with your new password and passwordConfirm to: ${Url}.\n If you didn't forgot your password, please ignore this email!`
+   const message = `Forgot your password? Please Submit a PATCH request with your new password and passwordConfirm to:\n ${Url}.\n If you didn't forgot your password, please ignore this email!`
    
    try{
       await SendEmail({
@@ -127,3 +128,28 @@ exports.forgotPassword = catchAsync(async(req, res, next) => {
       return next(new appError('There was an error Sending  email,please try again later',500));
    }
 })
+
+exports.resetPassword = async (req, res, next) => {
+   // 1) Get a User Based on the Token
+   const HashedToken= crypto.createHash('sha256').update(req.params.Token).digest('hex');
+   console.log(HashedToken)
+   const user = await User.findOne({passwordResetToken: HashedToken,passwordResetTokenExpires: {$gt: Date.now()}})
+ 
+   // 2) if the token not Expire and the User is Exist then Set New Password
+   if(!user){
+      return next(new appError('Token is invalid or Expired',400))
+   }
+   user.password = req.body.password
+   user.confirmPassword = req.body.confirmPassword
+   user.passwordResetToken = undefined
+   user.passwordResetTokenExpires = undefined
+   await user.save();
+   // 3) Update changedPasswordAt property for the User
+   
+   // 4) Log the User in, Send JWT Token
+    const Token = SignToken(user._id)
+    res.status(200).json({
+      status: 'success',
+      Token: Token
+    })
+}

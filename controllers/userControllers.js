@@ -12,12 +12,15 @@ const filterObj = (obj,allowedFields)=>{
     return newObj;
 }
 // Users functions
-exports.allusers =(req,res) =>{
-    res.status(500).json({
-        status: 'error',
-        message: 'not declared this route'
+exports.allusers =catchAsync(async(req,res) =>{
+    const users = await User.find()
+    res.status(200).json({
+        status: 'success',
+        Data:{
+            users: users
+        }
     })
-}
+});
 exports.cretaeuser =(req,res) =>{
     res.status(500).json({
         status: 'error',
@@ -48,4 +51,15 @@ exports.updateMe = catchAsync(async (req,res,next) =>{
             updateUser
         }
     })
+})
+exports.DeleteMe =  catchAsync(async(req,res,next) =>{
+    const user = await User.findByIdAndUpdate(req.user.id)
+    user.active = false
+    await user.save({validateBeforeSave: false});
+    
+    res.status(204).json({
+        statusbar: 'success',
+        message: `You have successfully deleted this user ${user.name}`
+    })
+    
 })

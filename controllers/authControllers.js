@@ -46,13 +46,18 @@ exports.login = catchAsync(async(req,res,next) =>{
       return next(new appError('Please provide both email and password',400));
    }
    
-   // // 2) check if email and password are correct and exists
-   const user = await User.findOne({email}).select('+password');
+   const user = await User.findOne({email}).select('+password').select('+active');
+   // 2) check if the user Active Account
+   // console.log(user.active)
+   if(!user.active === true){
+      return next(new appError('this account is Deleted',400));
+   }
+   // // 3) check if email and password are correct and exists
    if(!user || !(await user.correctPassword(password,user.password))){
       return next(new appError('Please provide Correct Email or password',401))
    }
    
-    // 3) if its ok Send Token to the User
+    // 4) if its ok Send Token to the User
     cretaeSendToken(user,200,res)
 })
 
@@ -157,11 +162,8 @@ exports.resetPassword = async (req, res, next) => {
 // User updating his/her password
 exports.updatePassword = catchAsync(async (req, res,next)=>{
    // 1) Get a User from Collection
-   const user = await User.findById(req.params.id).select('+password')
-   console.log(user)
-   // if(!user){
-   //    return next(new appError('User not found!',404))
-   // }
+   const user = await User.findById(req.user.id).select('+password')
+   // console.log(user)
    // 2) check if the Current Password posted is the same as the Passwordold 
 
    if(!(await user.correctPassword(req.body.currentpassword,user.password))){

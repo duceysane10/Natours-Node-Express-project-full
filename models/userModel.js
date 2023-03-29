@@ -47,6 +47,11 @@ const userSchema= new mongoose.Schema({
             message: 'Paswords are not Same'
         }
     },
+    active:{
+        type: Boolean,
+        default: true,
+        select: false
+    },
     photo: String,
     passwordResetToken: String,
     passwordResetTokenExpires:Date
@@ -101,7 +106,12 @@ userSchema.pre('save', function(next){
     next();
 })
 
-
+// this middleware only finds active users 
+userSchema.pre(/^find/,function(next){
+    // this ponts to the Current Query
+    this.find({active: {$ne:false}})
+    next();
+})
 
 // creating User Model
 const User= new mongoose.model('User', userSchema);

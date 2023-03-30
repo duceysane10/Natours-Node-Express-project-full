@@ -15,13 +15,20 @@ const SignToken = id =>{
 // Function creates and sends Token
 const cretaeSendToken =(user,statusCode,res) =>{
    const token = SignToken(user._id)
-     res.status(statusCode).json({
-        status : 'success',
-        Token: token,
-        data:{
-         user
-        }
-     });
+   const cookiesOptions ={
+      expires: new Date(Date.now() + process.env.cookie_EXPIRES_IN *24 * 60 * 60 * 1000),
+      httpOnly: true
+   }
+   if(process.env === 'production') cookiesOptions.secure = true
+   res.cookie('jwt',token,cookiesOptions);
+   user.password = undefined;
+   res.status(statusCode).json({
+      status : 'success',
+      Token: token,
+      data:{
+      user
+      }
+   });
 }
 exports.Signgup = catchAsync(async(req,res,next) =>{
     const newUser = await User.create({
@@ -35,7 +42,7 @@ exports.Signgup = catchAsync(async(req,res,next) =>{
       passwordResetTokenExpires: req.body.passwordResetTokenExpires
       // photo: req.body.photo
     });
-   
+    
     cretaeSendToken(newUser,201,res)
 });
 

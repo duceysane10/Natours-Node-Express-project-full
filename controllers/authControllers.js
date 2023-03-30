@@ -54,6 +54,10 @@ exports.login = catchAsync(async(req,res,next) =>{
    }
    
    const user = await User.findOne({email}).select('+password').select('+active');
+   // if the user does not exist 
+   if(!user){
+      return next(new appError('this user Does`t Exist',400));
+   }
    // 2) check if the user Active Account
    // console.log(user.active)
    if(!user.active === true){

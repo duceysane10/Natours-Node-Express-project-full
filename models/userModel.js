@@ -107,7 +107,7 @@ userSchema.pre('save', function(next){
 })
 
 // this middleware only finds active users 
-userSchema.pre(/^find/,function(next){
+userSchema.pre('find',function(next){
     // this ponts to the Current Query
     this.find({active: {$ne:false}})
     next();

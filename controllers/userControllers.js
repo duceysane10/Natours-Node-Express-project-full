@@ -16,6 +16,7 @@ exports.allusers =catchAsync(async(req,res) =>{
     const users = await User.find()
     res.status(200).json({
         status: 'success',
+        result: users.length,
         Data:{
             users: users
         }
@@ -27,12 +28,28 @@ exports.cretaeuser =(req,res) =>{
         message: 'not declared this route'
     })
 }
-exports.singleuser = (req,res) =>{
-    res.status(500).json({
-        status: 'error',
-        message: 'not declared this route'
-    })
-}
+
+  // Single user User functions
+    exports.singleuser =catchAsync(async(req,res,next) =>{
+        const user = await User.findById(req.params.id)
+        // if the user does not exist 
+        if(!user){
+            return next(new appError('this user Does`t Exist',400));
+        }
+           // 2) check if the user Active Account
+        // console.log(user.active)
+        if(!user.active === true){
+            return next(new appError('this account is Deleted',400));
+        }
+        res.status(200).json({
+            status: 'success',
+            result: user.length,
+            Data:{
+                users: user
+            }
+        })
+    });
+
 exports.updateMe = catchAsync(async (req,res,next) =>{
     // user Does not allow to update password 
     if(req.body.password || req.body.confirmPassword) next(new appError('this route is not allowed to update password go to /updateMyPassword',400));
@@ -52,6 +69,7 @@ exports.updateMe = catchAsync(async (req,res,next) =>{
         }
     })
 })
+// User Delete His Account but we only in active as backub
 exports.DeleteMe =  catchAsync(async(req,res,next) =>{
     const user = await User.findByIdAndUpdate(req.user.id)
     user.active = false
@@ -59,7 +77,25 @@ exports.DeleteMe =  catchAsync(async(req,res,next) =>{
     
     res.status(204).json({
         statusbar: 'success',
-        message: `You have successfully deleted this user ${user.name}`
+        message: `You have successfully deleted this user: " ${user.name}"`
+    })
+    
+})
+
+// Admin Delete user
+exports.DeleteuserByAdmin =  catchAsync(async(req,res,next) =>{
+    const user = await User.findByIdAndUpdate(req.params.id).select('+active');
+    // 2) check if the user Active Account
+    // console.log(user.active)
+    if(!user.active === true){
+        return next(new appError(`this account  : " ${user.name} " already Deleted`,400));
+    }
+    user.active = false
+    await user.save({validateBeforeSave: false});
+    
+    res.status(201).json({
+        statusbar: 'success',
+        message: `You have successfully deleted this user: " ${user.name} "`
     })
     
 })

@@ -13,6 +13,8 @@ router.patch('/updateMyProfile/',authControllers.protectedRoute, userControllers
 router.delete('/DeleteMe/',authControllers.protectedRoute, userControllers.DeleteMe);
 
 router.route('/').get(authControllers.protectedRoute,authControllers.restrictTo('admin','lead-guidelead-guide'),userControllers.allusers).post(userControllers.cretaeuser);
-router.route('/:id').get(userControllers.singleuser);
+router.route('/:id')
+.get(authControllers.protectedRoute,authControllers.restrictTo('admin','lead-guidelead-guide'),userControllers.singleuser)
+.delete(authControllers.protectedRoute,authControllers.restrictTo('admin'),userControllers.DeleteuserByAdmin);
 
 module.exports = router;

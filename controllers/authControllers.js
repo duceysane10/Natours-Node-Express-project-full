@@ -37,7 +37,6 @@ exports.Signgup = catchAsync(async(req,res,next) =>{
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
       passwordChangedAt:req.body.passwordChangedAt,
-      role: req.body.role,
       passwordResetToken: req.body.passwordResetToken,
       passwordResetTokenExpires: req.body.passwordResetTokenExpires
       // photo: req.body.photo

@@ -105,7 +105,11 @@ const tourSchema = new mongoose.Schema({
         type: Boolean,
         default: false
 },
-guides: Array
+// Embedding guides
+guides: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+}]
 }, 
 // in order to display virtual property type lines bellow
 {
@@ -125,10 +129,20 @@ tourSchema.pre('save', function(next){
 })
 
 // Saving Tour Guides Using Embbeding 
-tourSchema.pre('save', async function(next){
-    const PromiseGuides = this.guides.map(async id => await User.findById(id))
-     this.guides = await Promise.all(PromiseGuides)
-    next()
+// tourSchema.pre('save', async function(next){
+//     const PromiseGuides = this.guides.map(async id => await User.findById(id))
+//      this.guides = await Promise.all(PromiseGuides)
+//     next()
+// })
+
+// Populating guides when we use Refrence
+tourSchema.pre(/^find/ ,function(next){
+    this.populate({
+        // lpath: waa fileld ga xogta laga soo aqrinaayo , select: waxay kaa reebee inta object ee adan rabin in userka loo soo bandhigo sida __v 
+        path: 'guides',
+        select: '-__v -passwordChangedAt'
+    });
+    next();
 })
 tourSchema.pre('save', function(next){
     console.log('will saving.......');

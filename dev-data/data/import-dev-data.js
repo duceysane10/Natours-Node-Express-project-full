@@ -18,7 +18,8 @@ mongoose.connect(DB, {
 });
 
 //  Importing JSON DATA in to the database
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`,'utf-8'));
+// to import Data in the Database: type in the terminal=  node ./dev-data/data/import-dev-data.js --import
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`,'utf-8'));
 const importData = async() =>{
    try{
     await Tour.create(tours);
@@ -29,7 +30,8 @@ const importData = async() =>{
     process.exit();
 }
 
-// DELE ALL TOURS IN DATABASE
+// DELETE ALL TOURS IN DATABASE
+// // to DELETE Data from the Database : type in the terminal= node ./dev-data/data/import-dev-data.js --deletedata
 const DeleteData = async() =>{
     try{
         console.log(Tour);

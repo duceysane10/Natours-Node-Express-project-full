@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+const User = require('./userModel');
+const { promises } = require('nodemailer/lib/xoauth2');
 // creating Schema
 const tourSchema = new mongoose.Schema({
     name:{
@@ -73,11 +75,37 @@ const tourSchema = new mongoose.Schema({
         default: Date.now(),
         Select : false,
     },
-    startDates : [Date],  
+    startDates : [Date], 
+    startLocation:{
+        type:{
+            // GeoJson location
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+    },
+    locations:[
+        {
+            type:{
+                // GeoJson location
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }
+    ],
     secretTour: {
         type: Boolean,
         default: false
-    }
+},
+guides: Array
 }, 
 // in order to display virtual property type lines bellow
 {
@@ -96,6 +124,12 @@ tourSchema.pre('save', function(next){
     next();
 })
 
+// Saving Tour Guides Using Embbeding 
+tourSchema.pre('save', async function(next){
+    const PromiseGuides = this.guides.map(async id => await User.findById(id))
+     this.guides = await Promise.all(PromiseGuides)
+    next()
+})
 tourSchema.pre('save', function(next){
     console.log('will saving.......');
     next();

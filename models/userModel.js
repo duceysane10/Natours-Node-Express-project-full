@@ -55,6 +55,11 @@ const userSchema= new mongoose.Schema({
     photo: String,
     passwordResetToken: String,
     passwordResetTokenExpires:Date
+},
+// in order to display virtual property type lines bellow
+{
+    toJSON :{virtuals:true},
+    toObject :{virtuals:true},
 });
 
  
